@@ -95,8 +95,7 @@ type DocumentExtractorsConfig struct {
 }
 
 type SummarizerConfig struct {
-	Enabled      bool   `mapstructure:"enabled"`
-	CustomPrompt string `mapstructure:"custom_prompt"`
+	Enabled bool `mapstructure:"enabled"`
 }
 
 type CustomPromptsConfig struct {
