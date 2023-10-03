@@ -37,7 +37,7 @@ func TestZepOpenAILLM_TestConfigureClient(t *testing.T) {
 			},
 		}
 
-		options, err := zllm.configureClient(cfg)
+		options, err := zllm.configureClient(cfg.llm)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
@@ -55,7 +55,7 @@ func TestZepOpenAILLM_TestConfigureClient(t *testing.T) {
 			},
 		}
 
-		options, err := zllm.configureClient(cfg)
+		options, err := zllm.configureClient(cfg.llm)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
@@ -78,7 +78,7 @@ func TestZepOpenAILLM_TestConfigureClient(t *testing.T) {
 			},
 		}
 
-		options, err := zllm.configureClient(cfg)
+		options, err := zllm.configureClient(cfg.llm)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
@@ -97,7 +97,7 @@ func TestZepOpenAILLM_TestConfigureClient(t *testing.T) {
 			},
 		}
 
-		options, err := zllm.configureClient(cfg)
+		options, err := zllm.configureClient(cfg.llm)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
@@ -115,7 +115,7 @@ func TestZepOpenAILLM_TestConfigureClient(t *testing.T) {
 			},
 		}
 
-		options, err := zllm.configureClient(cfg)
+		options, err := zllm.configureClient(cfg.llm)
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}

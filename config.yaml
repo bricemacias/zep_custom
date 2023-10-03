@@ -1,7 +1,10 @@
 llm:
   # openai or anthropic
   service: "openai"
-  # OpenAI: gpt-3.5-turbo, gpt-4, gpt-3.5-turbo-16k, gpt-4-32k; Anthropic: claude-instant-1 or claude-2
+  # OpenAI: gpt-3.5-turbo, gpt-4, gpt-3.5-turbo-16k, gpt-4-32k; Anthropic: claude-instant-1 or claude-2.
+  # For alternate OpenAI-compatible API endpoint, you can use available open source models.
+  # Available Open Source models include: meta-llama/Llama-2-7b-chat-hf, meta-llama/Llama-2-13b-chat-hf,
+  # meta-llama/Llama-2-70b-chat-hf
   model: "gpt-3.5-turbo"
   ## OpenAI-specific settings
   # Only used for Azure OpenAI API
@@ -18,6 +21,31 @@ llm:
   # Use only with an alternate OpenAI-compatible API endpoint
   openai_endpoint:
   openai_org_id:
+openai_embeddings:
+  # Enable if you want to use distinct OpenAI compatible clients for llm and embeddings.
+  # When enabled, configure the OpenAI embeddings client below.
+  enabled: false
+  client:
+    service: "openai"
+    # Even when only using the OpenAI client for embeddings,
+    # the LLM model must be set to a valid OpenAI model.
+    # Valid OpenAI Models: gpt-3.5-turbo, gpt-4, gpt-3.5-turbo-16k, gpt-4-32k;
+    model: "gpt-3.5-turbo"
+    ## OpenAI-specific settings
+    # Only used for Azure OpenAI API
+    azure_openai_endpoint:
+    # for Azure OpenAI API deployment, the model may be deployed with custom deployment names
+    # set the deployment names if you encounter in logs HTTP 404 errors:
+    #   "The API deployment for this resource does not exist."
+    azure_openai:
+    # llm.model name is used as deployment name as reasonable default if not set
+    # assuming base model is deployed with deployment name matching model name
+    #   llm_deployment: "gpt-3.5-turbo-customname"
+    # embeddings deployment is required when Zep is configured to use OpenAI embeddings
+    #   embedding_deployment: "text-embedding-ada-002-customname"
+    # Use only with an alternate OpenAI-compatible API endpoint
+    openai_endpoint:
+    openai_org_id:
 nlp:
   server_url: "http://localhost:5557"
 memory:
@@ -31,8 +59,9 @@ extractors:
       buffer_size: 1000
       dimensions: 384
       service: "local"
-#      dimensions: 1536
-#      service: "openai"
+  #     If set to "openai", the above "openai_embeddings" client configuration will be used.
+  #      dimensions: 1536
+  #      service: "openai"
   messages:
     summarizer:
       enabled: true
@@ -42,8 +71,11 @@ extractors:
       enabled: true
     embeddings:
       enabled: true
+      #     If set to "local", it uses the NLP server with your chosen model.
+      #     Ensure the dimensions match those in your NLP server environment.
       dimensions: 384
       service: "local"
+#     If set to "openai", the above "openai_embeddings" client configuration will be used.
 #      dimensions: 1536
 #      service: "openai"
 store:
@@ -108,6 +140,9 @@ custom_prompts:
     #   Current summary: {{.PrevSummary}}
     #   New lines of conversation: {{.MessagesJoined}}
     #   New summary:`
+    #
+    # For Open Source models compatible with the OpenAI client,
+    # follow the prompt guidelines provided by the model owners.
     #
     # If left empty, the default OpenAI summary prompt from zep/pkg/extractors/prompts.go will be used.
     openai: |

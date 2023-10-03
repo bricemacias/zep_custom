@@ -17,15 +17,17 @@ func EmbedTexts(
 	if len(text) == 0 {
 		return nil, errors.New("no text to embed")
 	}
+	
+	embeddingsClient := appState.EmbeddingsClient
 
-	if appState.LLMClient == nil {
+	if embeddingsClient == nil {
 		return nil, errors.New(InvalidLLMModelError)
 	}
 
 	if model.Service == "local" {
 		return embedTextsLocal(ctx, appState, documentType, text)
 	}
-	return appState.LLMClient.EmbedTexts(ctx, text)
+	return embeddingsClient.EmbedTexts(ctx, text)
 }
 
 func GetEmbeddingModel(

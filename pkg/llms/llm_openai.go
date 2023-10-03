@@ -2,6 +2,7 @@ package llms
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/tmc/langchaingo/schema"
@@ -20,9 +21,9 @@ const MaxOpenAIAPIRequestAttempts = 5
 
 var _ models.ZepLLM = &ZepOpenAILLM{}
 
-func NewOpenAILLM(ctx context.Context, cfg *config.Config) (*ZepOpenAILLM, error) {
+func NewOpenAILLM(ctx context.Context, llmConfig *config.LLM) (*ZepOpenAILLM, error) {
 	zllm := &ZepOpenAILLM{}
-	err := zllm.Init(ctx, cfg)
+	err := zllm.Init(ctx, llmConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +35,7 @@ type ZepOpenAILLM struct {
 	tkm *tiktoken.Tiktoken
 }
 
-func (zllm *ZepOpenAILLM) Init(_ context.Context, cfg *config.Config) error {
+func (zllm *ZepOpenAILLM) Init(_ context.Context, llmConfig *config.LLM) error {
 	// Initialize the Tiktoken client
 	encoding := "cl100k_base"
 	tkm, err := tiktoken.GetEncoding(encoding)
@@ -43,7 +44,7 @@ func (zllm *ZepOpenAILLM) Init(_ context.Context, cfg *config.Config) error {
 	}
 	zllm.tkm = tkm
 
-	options, err := zllm.configureClient(cfg)
+	options, err := zllm.configureClient(llmConfig)
 	if err != nil {
 		return err
 	}
@@ -106,14 +107,14 @@ func (zllm *ZepOpenAILLM) GetTokenCount(text string) (int, error) {
 	return len(zllm.tkm.Encode(text, nil, nil)), nil
 }
 
-func (zllm *ZepOpenAILLM) configureClient(cfg *config.Config) ([]openai.Option, error) {
+func (zllm *ZepOpenAILLM) configureClient(llmConfig *config.LLM) ([]openai.Option, error) {
 	// Retrieve the OpenAIAPIKey from configuration
-	apiKey := cfg.LLM.OpenAIAPIKey
+	apiKey := llmConfig.OpenAIAPIKey
 	// If the key is not set, log a fatal error and exit
 	if apiKey == "" {
 		log.Fatal(OpenAIAPIKeyNotSetError)
 	}
-	if cfg.LLM.AzureOpenAIEndpoint != "" && cfg.LLM.OpenAIEndpoint != "" {
+	if llmConfig.AzureOpenAIEndpoint != "" && llmConfig.OpenAIEndpoint != "" {
 		log.Fatal("only one of AzureOpenAIEndpoint or OpenAIEndpoint can be set")
 	}
 
@@ -123,33 +124,33 @@ func (zllm *ZepOpenAILLM) configureClient(cfg *config.Config) ([]openai.Option, 
 	options = append(
 		options,
 		openai.WithHTTPClient(retryableHTTPClient.StandardClient()),
-		openai.WithModel(cfg.LLM.Model),
+		openai.WithModel(llmConfig.Model),
 		openai.WithToken(apiKey),
 	)
 
 	switch {
-	case cfg.LLM.AzureOpenAIEndpoint != "":
+	case llmConfig.AzureOpenAIEndpoint != "":
 		// Check configuration for AzureOpenAIEndpoint; if it's set, use the DefaultAzureConfig
 		// and provided endpoint Path
 		options = append(
 			options,
 			openai.WithAPIType(openai.APITypeAzure),
-			openai.WithBaseURL(cfg.LLM.AzureOpenAIEndpoint),
+			openai.WithBaseURL(llmConfig.AzureOpenAIEndpoint),
 		)
-		if cfg.LLM.AzureOpenAIModel.EmbeddingDeployment != "" {
+		if llmConfig.AzureOpenAIModel.EmbeddingDeployment != "" {
 			options = append(
 				options,
-				openai.WithEmbeddingModel(cfg.LLM.AzureOpenAIModel.EmbeddingDeployment),
+				openai.WithEmbeddingModel(llmConfig.AzureOpenAIModel.EmbeddingDeployment),
 			)
 		}
-	case cfg.LLM.OpenAIEndpoint != "":
+	case llmConfig.OpenAIEndpoint != "":
 		// If an alternate OpenAI-compatible endpoint Path is set, use this as the base Path for requests
 		options = append(
 			options,
-			openai.WithBaseURL(cfg.LLM.OpenAIEndpoint),
+			openai.WithBaseURL(llmConfig.OpenAIEndpoint),
 		)
-	case cfg.LLM.OpenAIOrgID != "":
-		options = append(options, openai.WithOrganization(cfg.LLM.OpenAIOrgID))
+	case llmConfig.OpenAIOrgID != "":
+		options = append(options, openai.WithOrganization(llmConfig.OpenAIOrgID))
 	}
 
 	return options, nil

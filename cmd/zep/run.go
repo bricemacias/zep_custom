@@ -63,12 +63,20 @@ func NewAppState(cfg *config.Config) *models.AppState {
 
 	// Create a new LLM client
 	llmClient, err := llms.NewLLMClient(ctx, cfg)
+
+	embeddingsClient := llmClient
+
+	if cfg.OpenAIEmbeddings.Enabled {
+		embeddingsClient, err = llms.NewEmbeddingsClient(ctx, cfg)
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	appState := &models.AppState{
 		LLMClient: llmClient,
+		EmbeddingsClient: embeddingsClient,
 		Config:    cfg,
 	}
 
