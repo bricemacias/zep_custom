@@ -17,9 +17,9 @@ type Config struct {
 	CustomPrompts    CustomPromptsConfig    `mapstructure:"custom_prompts"`
 }
 
-type OpenAIEmbeddingsConfig {
+type OpenAIEmbeddingsConfig struct {
 	Enabled bool `mapstructure:"enabled"`
-	Client LLM  `mapstructure:"client"`
+	Client  LLM  `mapstructure:"client"`
 }
 
 type StoreConfig struct {
